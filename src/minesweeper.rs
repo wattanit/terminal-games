@@ -7,6 +7,7 @@ pub struct Game {
     cursor_y: i32,
     grid_width: i32,
     grid_height: i32,
+    initialized: bool,
 }
 
 impl Game {
@@ -18,6 +19,7 @@ impl Game {
             cursor_y: 0,
             grid_width: width,
             grid_height: height,
+            initialized: false,
         }
     }
 
@@ -66,16 +68,45 @@ impl Game {
         }
     }
 
+    fn open_cell(&mut self) {
+        // Open the cell
+        let cell = self.grid[self.cursor_y as usize][self.cursor_x as usize];
+        if cell == '.' {
+            // open the unopened cell
+            self.grid[self.cursor_y as usize][self.cursor_x as usize] = ' ';
+        } else if cell == 'F' {
+            // Do nothing if the cell is flagged
+        } else {
+            // check for conditions to open surrounding cells
+        }
+    }
+
+    fn flag_mine(&mut self) {
+        // Flag the cell
+        let cell = self.grid[self.cursor_y as usize][self.cursor_x as usize];
+        if cell == 'F' {
+            // flag the unopened cell
+            self.grid[self.cursor_y as usize][self.cursor_x as usize] = '.';
+        } else if cell == '.' {
+            // unflag the unopened cell
+            self.grid[self.cursor_y as usize][self.cursor_x as usize] = 'F';
+        } else {
+            // Do nothing if the cell is already opened
+        }
+    }
+
     pub fn run(&mut self) {
         loop {
             self.draw();
             let ch = getch();
 
-            if ch == 113 { // 'q' key to quit
-                break;
+            match ch {
+                113 => break, // 'q' key to quit
+                32 => self.open_cell(), // 'space' key to open cell
+                98 => self.flag_mine(), // 'b' key to flag mine
+                102 => self.flag_mine(), // 'f' key to flag mine
+                _ => self.move_cursor(ch),
             }
-
-            self.move_cursor(ch);
         }
     }
 }
