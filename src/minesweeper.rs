@@ -3,24 +3,39 @@ use std::cmp::{max, min};
 
 pub struct Game {
     grid: Vec<Vec<char>>,
+    bomb_grid: Vec<Vec<bool>>,
     cursor_x: i32,
     cursor_y: i32,
     grid_width: i32,
     grid_height: i32,
+    number_of_mines: i32,
     initialized: bool,
 }
 
 impl Game {
-    pub fn new(width: i32, height: i32) -> Self {
+    pub fn new(width: i32, height: i32, mine_count: i32) -> Self {
         let grid = vec![vec!['.'; width as usize]; height as usize];
+        let bomb_grid = vec![vec![false; width as usize]; height as usize];
         Game {
             grid,
+            bomb_grid,
             cursor_x: 0,
             cursor_y: 0,
             grid_width: width,
             grid_height: height,
+            number_of_mines: mine_count,
             initialized: false,
         }
+    }
+
+    fn get_cell_coordinates(&self) -> Vec<(i32, i32)> {
+        let mut coordinates = Vec::new();
+        for i in 0..self.grid_height {
+            for j in 0..self.grid_width {
+                coordinates.push((i, j));
+            }
+        }
+        coordinates
     }
 
     fn draw(&self) {
@@ -68,7 +83,34 @@ impl Game {
         }
     }
 
+    fn init_game(&mut self) {
+        // Initialize the game
+        self.initialized = true;
+
+        // Place mines
+        let available_cells = self.get_cell_coordinates();
+
+        // remove all cells with manhattan distance less than half the width of the grid from the cursor
+        let cursor_x = self.cursor_x;
+        let cursor_y = self.cursor_y;
+        let available_cells = available_cells.into_iter().filter(|(x, y)| {
+            let dx = (cursor_x - x).abs();
+            let dy = (cursor_y - y).abs();
+            dx + dy > self.grid_width / 2
+        }).collect::<Vec<(i32, i32)>>();
+        
+        // shuffle the available cells
+
+        // place mines
+
+    }
+
     fn open_cell(&mut self) {
+        if !self.initialized {
+            // Initialize the game
+            self.init_game()
+        }
+
         // Open the cell
         let cell = self.grid[self.cursor_y as usize][self.cursor_x as usize];
         if cell == '.' {
